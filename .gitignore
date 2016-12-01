@@ -49,3 +49,8 @@ Temporary Items
 *.iml
 *.xsl
 *.properties
+*.cache
+*.class
+*.css
+target/streams/runtime/externalDependencyClasspath/$global/streams/export
+*.history
