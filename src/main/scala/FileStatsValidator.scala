@@ -101,6 +101,7 @@ class FileStatsValidator {
   def main(args: Array[String]): Unit = {
 
     val hiveSiteXmlPath = args(0)
+    //example:  file:///path/to/hive-site.xml
     val propertiesFilePath = args(1)
 
     var fileStatsTableName: String = ""
