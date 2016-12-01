@@ -134,7 +134,7 @@ class FileStatsValidator {
 
       result1.foreach(singleFileResult => {
         println("Records Count Validation Result: " + singleFileResult._1)
-        println("Failure Percentage Result : " + singleFileResult._1)
+        println("Failure Percentage Result : " + singleFileResult._2)
       })
 
 
