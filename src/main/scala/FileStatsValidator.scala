@@ -1,13 +1,18 @@
-import java.io.{FileInputStream, IOException, InputStream}
+import java.io._
+import java.nio.file.{Files, Paths}
 import java.sql.{Connection, DriverManager, ResultSet, SQLException, Statement}
+import java.util
 import java.util.Properties
 
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hive.conf.HiveConf
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars
 import org.apache.logging.log4j.LogManager
+import org.json.JSONObject
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.Breaks._
 
 class FileStatsValidator {
 
@@ -35,7 +40,8 @@ class FileStatsValidator {
   }
 
 
-  def validateFileStats(fileStatsTableName: String, successEventsTableName: String, failedEventsTableName: String, partitionFieldName: String, partitionDate: String, conn: Connection): ArrayBuffer[(String, String)] = {
+  //  def validateFileStats(fileStatsTableName: String, successEventsTableName: String, failedEventsTableName: String, partitionFieldName: String, partitionDate: String, conn: Connection): ArrayBuffer[(String, String)] = {
+  def validateFileStats(fileStatsTableName: String, fileStatsTableNamePartitionFiledName: String, fileStatsTableNamePartitionValue: String, successEventsTablePartitionFiledName: String, successEventsTablePartitionValue: String, failedEventsTableName: String, failedEventsTablePartitionFiledName: String, failedEventsTablePartitionValue: String, feedsToFileNamesMappingLocation: String, conn: Connection): ArrayBuffer[(String, String)] = {
 
     var finalResult: ArrayBuffer[(String, String)] = new ArrayBuffer[(String, String)]
     var fileNamesAndRecordCounts: ArrayBuffer[(String, Double)] = new ArrayBuffer[(String, Double)]
@@ -44,18 +50,34 @@ class FileStatsValidator {
 
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
     var st: Statement = conn.createStatement()
-    val query1: String = " Select distinct(filename), recordscount from " + fileStatsTableName + " where " + partitionFieldName + "=" + partitionDate
+    val query1: String = " Select distinct(filename), recordscount from " + fileStatsTableName + " where " + fileStatsTableNamePartitionFiledName + "=" + fileStatsTableNamePartitionValue
     val rs1: ResultSet = st.executeQuery(query1)
 
     while (rs1.next()) {
       fileNamesAndRecordCounts += ((rs1.getString(1), rs1.getDouble(2)))
     }
 
+
+    //Step 2 : get a hashmap of FilePath and SuccessTableName mapping
+    var filePathToTableNameMap: mutable.HashMap[String, String] = jsonToHashMap(feedsToFileNamesMappingLocation)
+
     logger.debug("FileStatValidator : Looping on All files retrieve " + fileStatsTableName)
     fileNamesAndRecordCounts.foreach(oneFileStats => {
       val fullFileName = oneFileStats._1
       val fileName = fullFileName.substring(fullFileName.lastIndexOf("/"), fullFileName.length)
+      val filePath = fullFileName.substring(0, fullFileName.lastIndexOf("/"))
       val recordsCount = oneFileStats._2
+
+      //Step 3 : get correct SuccessTableName
+      var successEventsTableName: String = ""
+      breakable {
+        filePathToTableNameMap.foreach(x => {
+          if (x._2.contains(filePath)) {
+            successEventsTableName = x._1
+            break
+          }
+        })
+      }
 
       var successEventsCount: Double = -1
       var failedEventsCount: Double = -1
@@ -63,16 +85,16 @@ class FileStatsValidator {
       var failurePercentage: String = ""
 
       logger.debug("FileStatValidator : Getting the number of records for file " + fileName + " from table " + successEventsTableName)
-      // Step 2 : get the number of records from the SuccessEventsTable
-      val query2 = "Select count(*) from " + successEventsTableName + " where " + partitionFieldName + "=" + partitionDate + " and filename=" + fileName
+      // Step 4 : get the number of records from the SuccessEventsTable
+      val query2 = "Select count(*) from " + successEventsTableName + " where " + successEventsTablePartitionFiledName + "=" + successEventsTablePartitionValue + " and filename=" + fileName
       val rs2: ResultSet = st.executeQuery(query2)
       while (rs2.next()) {
         successEventsCount = rs2.getDouble(1)
       }
 
       logger.debug("FileStatValidator : Getting the number of records for file " + fileName + " from table " + failedEventsTableName)
-      // Step3 : get the number of records from the FailedEventsTable
-      val query3 = "Select count(*) from " + failedEventsTableName + " where " + partitionFieldName + "=" + partitionDate + " and filename=" + fileName
+      // Step5 : get the number of records from the FailedEventsTable
+      val query3 = "Select count(*) from " + failedEventsTableName + " where " + failedEventsTablePartitionFiledName + "=" + failedEventsTablePartitionValue + " and filename=" + fileName
       val rs3: ResultSet = st.executeQuery(query3)
       while (rs3.next()) {
         failedEventsCount = rs3.getDouble(1)
@@ -104,6 +126,30 @@ class FileStatsValidator {
   }
 
 
+  def jsonToHashMap(pathToJsonFile: String): mutable.HashMap[String, String] = {
+    var hashmap: mutable.HashMap[String, String] = new mutable.HashMap[String, String]
+    var bufferedReader: BufferedReader = null
+    var jsonObj: JSONObject = null
+    var keysList: List[String] = null
+    try {
+      var encoded: Array[Byte] = Files.readAllBytes(Paths.get(pathToJsonFile))
+      var jsonString: String = new String(encoded, "UTF-8")
+      jsonObj = new JSONObject(jsonString)
+
+      var keysToCopyIterator: util.Iterator[_] = jsonObj.keys()
+
+      while (keysToCopyIterator.hasNext) {
+        var oneKey: String = String.valueOf(keysToCopyIterator.next())
+        var value: String = String.valueOf(jsonObj.get(oneKey))
+        hashmap += (oneKey -> value)
+
+      }
+    }
+
+    return hashmap
+  }
+
+
   def main(args: Array[String]): Unit = {
 
     val hiveSiteXmlPath = args(0)
@@ -111,11 +157,18 @@ class FileStatsValidator {
     val propertiesFilePath = args(1)
 
     var fileStatsTableName: String = ""
-    var successEventsTableName: String = ""
+    var fileStatsTableNamePartitionFiledName: String = ""
+    var fileStatsTableNamePartitionValue: String = ""
+    //    var successEventsTableName: String = ""
     var failedEventsTableName: String = ""
-    var partitionDate: String = ""
-    var partitionFieldName: String = ""
+    //    var partitionDate: String = ""
+    //    var partitionFieldName: String = ""
     var hiveInstanceLocationAndPort: String = ""
+    var successEventsTablePartitionValue: String = ""
+    var successEventsTablePartitionFiledName: String = ""
+    var failedEventsTablePartitionValue: String = ""
+    var failedEventsTablePartitionFiledName: String = ""
+    var feedsToFileNamesMappingLocation: String = ""
 
 
     var connection: Connection = null
@@ -130,14 +183,22 @@ class FileStatsValidator {
       // load a properties file
       prop.load(input)
       // get the property value and print it out
-      fileStatsTableName = prop.getProperty("file.stats.table.name")
-      successEventsTableName = prop.getProperty("success.events.table.name")
+      //      partitionDate = prop.getProperty("partition.date")
+      //      fileStatsTableName = prop.getProperty("file.stats.table.name")
+      //      successEventsTableName = prop.getProperty("success.events.table.name")
+
       failedEventsTableName = prop.getProperty("failed.events.table.name")
-      partitionDate = prop.getProperty("partition.date")
-      partitionFieldName = prop.getProperty("partition.field.name")
+      //      partitionFieldName = prop.getProperty("partition.field.name")
+      successEventsTablePartitionValue = prop.getProperty("success.events.table.partition.value")
+      successEventsTablePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
+      failedEventsTablePartitionValue = prop.getProperty("success.events.table.partition.value")
+      failedEventsTablePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
+      fileStatsTableNamePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
+      feedsToFileNamesMappingLocation = prop.getProperty("feeds.to.filenames.mapping.location")
+
 
       connection = getConnection(hiveConf)
-      val result1 = validateFileStats(fileStatsTableName, successEventsTableName, failedEventsTableName, partitionFieldName, partitionDate, connection)
+      val result1 = validateFileStats(fileStatsTableName, fileStatsTableNamePartitionFiledName, fileStatsTableNamePartitionValue, successEventsTablePartitionFiledName, successEventsTablePartitionValue, failedEventsTableName, failedEventsTablePartitionFiledName, failedEventsTablePartitionValue, feedsToFileNamesMappingLocation, connection)
 
       result1.foreach(singleFileResult => {
         println("Records Count Validation Result: " + singleFileResult._1)

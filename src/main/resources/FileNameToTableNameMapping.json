@@ -1,0 +1,14 @@
+{
+  "ch11_test.AirAdjustmentCS5": "/home/bigdata/emm/jam/air_adjustments/kprod/incoming",
+  "kprod.AirRefillCS5": "/home/bigdata/emm/jam/air_refill/kprod/incoming",
+  "kprod.CCNDataCS5": "/home/bigdata/emm/jam/cipip_data/kprod/incoming",
+  "kprod.CCNVoiceSMSCS5": "/home/bigdata/emm/jam/cipip_voice_sms/kprod/incoming",
+  "kprod.SDPAdjustmentCS5": "/home/bigdata/emm/jam/sdp_adjustments/kprod/incoming",
+  "kprod.SDPLifeCycleCS5": "/home/bigdata/emm/jam/sdp_life_cycle/kprod/incoming",
+  "kprod.SandvineAudit": "/home/bigdata/vas/messaging/sandvine/bmu/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/brb/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/cuw/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/cym/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/es/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/guy/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/ht/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/jam/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/pn/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/slu/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/sur/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/tci/sandvine_audit/kprod/incoming,/home/bigdata/vas/messaging/sandvine/tt/sandvine_audit/kprod/incoming",
+  "kprod.SandvineVoip": "/home/bigdata/vas/messaging/sandvine/bmu/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/brb/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/cuw/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/cym/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/es/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/guy/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/ht/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/jam/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/pn/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/slu/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/sur/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/tci/sandvine_voip/kprod/incoming,/home/bigdata/vas/messaging/sandvine/tt/sandvine_voip/kprod/incoming",
+  "kprod.VerasDigix": "/home/bigdata/emm/jam/veras_digicelx/kprod/incoming",
+  "kprod.VerasDigiy": "/home/bigdata/emm/jam/veras_digicely/kprod/incoming",
+  "kprod.RedkneeTransaction": "/user/kamanjaprod/redknee/redknee_transaction/incoming",
+  "kprod.RedkneeCalldetail": "/user/kamanjaprod/redknee/redknee_calldetail/incoming"
+}
