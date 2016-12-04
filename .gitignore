@@ -48,7 +48,6 @@ Temporary Items
 *.xml
 *.iml
 *.xsl
-*.properties
 *.cache
 *.class
 *.css
