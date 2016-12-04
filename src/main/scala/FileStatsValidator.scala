@@ -1,5 +1,5 @@
 import java.io.{FileInputStream, IOException, InputStream}
-import java.sql.{Connection, DriverManager, ResultSet, Statement}
+import java.sql.{Connection, DriverManager, ResultSet, SQLException, Statement}
 import java.util.Properties
 
 import org.apache.hadoop.fs.Path
@@ -9,9 +9,6 @@ import org.apache.logging.log4j.LogManager
 
 import scala.collection.mutable.ArrayBuffer
 
-/**
-  * Created by haitham.b on 12/1/2016.
-  */
 class FileStatsValidator {
 
   lazy val loggerName = this.getClass.getName
@@ -19,7 +16,7 @@ class FileStatsValidator {
 
 
   def getConnection(hiveConf: HiveConf): Connection = {
-
+    logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
     var conn: Connection = null
 
     try {
@@ -28,8 +25,12 @@ class FileStatsValidator {
         hiveConf.getVar(ConfVars.METASTORECONNECTURLKEY),
         hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME),
         hiveConf.getVar(ConfVars.METASTOREPWD));
+    } catch {
+      case sqlEx: SQLException => {
+        logger.error(sqlEx)
+      }
     }
-
+    logger.warn("FileStatValidator : Connection successful")
     return conn
   }
 
@@ -38,6 +39,8 @@ class FileStatsValidator {
 
     var finalResult: ArrayBuffer[(String, String)] = new ArrayBuffer[(String, String)]
     var fileNamesAndRecordCounts: ArrayBuffer[(String, Double)] = new ArrayBuffer[(String, Double)]
+
+    logger.debug("FileStatValidator : Getting all unique file names and recordscount for given date partition in table " + fileStatsTableName)
 
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
     var st: Statement = conn.createStatement()
@@ -48,7 +51,7 @@ class FileStatsValidator {
       fileNamesAndRecordCounts += ((rs1.getString(1), rs1.getDouble(2)))
     }
 
-
+    logger.debug("FileStatValidator : Looping on All files retrieve " + fileStatsTableName)
     fileNamesAndRecordCounts.foreach(oneFileStats => {
       val fullFileName = oneFileStats._1
       val fileName = fullFileName.substring(fullFileName.lastIndexOf("/"), fullFileName.length)
@@ -59,6 +62,7 @@ class FileStatsValidator {
       var resultCountValidation: String = ""
       var failurePercentage: String = ""
 
+      logger.debug("FileStatValidator : Getting the number of records for file " + fileName + " from table " + successEventsTableName)
       // Step 2 : get the number of records from the SuccessEventsTable
       val query2 = "Select count(*) from " + successEventsTableName + " where " + partitionFieldName + "=" + partitionDate + " and filename=" + fileName
       val rs2: ResultSet = st.executeQuery(query2)
@@ -66,13 +70,14 @@ class FileStatsValidator {
         successEventsCount = rs2.getDouble(1)
       }
 
+      logger.debug("FileStatValidator : Getting the number of records for file " + fileName + " from table " + failedEventsTableName)
       // Step3 : get the number of records from the FailedEventsTable
       val query3 = "Select count(*) from " + failedEventsTableName + " where " + partitionFieldName + "=" + partitionDate + " and filename=" + fileName
       val rs3: ResultSet = st.executeQuery(query3)
       while (rs3.next()) {
         failedEventsCount = rs3.getDouble(1)
       }
-
+      logger.debug("FileStatValidator : Validating records count")
       if (recordsCount == (successEventsCount + failedEventsCount)) {
         resultCountValidation = "count matches for file " + fileName
       } else {
@@ -80,6 +85,7 @@ class FileStatsValidator {
           recordsCount, successEventsCount, failedEventsCount, recordsCount - successEventsCount - failedEventsCount)
       }
 
+      logger.debug("FileStatValidator : Calculating failure percentage")
       failurePercentage = calculateFailurePercentage(successEventsCount, failedEventsCount)
       finalResult += ((resultCountValidation, failurePercentage))
 
@@ -141,16 +147,16 @@ class FileStatsValidator {
 
     } catch {
       case ex: IOException => {
-        ex.printStackTrace()
+        logger.error(ex)
       }
     } finally {
       connection.close()
       if (input != null) {
         try {
-          input.close();
+          input.close()
         } catch {
           case e: IOException => {
-            e.printStackTrace()
+            logger.error(e)
           }
         }
       }
