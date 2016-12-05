@@ -50,7 +50,7 @@ class FileStatsValidator {
 
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
     var st: Statement = conn.createStatement()
-    val query1: String = " Select distinct(filename), recordscount from " + fileStatsTableName + " where " + fileStatsTableNamePartitionFiledName + "=" + fileStatsTableNamePartitionValue
+    val query1: String = " Select distinct(filename), recordscount from " + fileStatsTableName + " where " + fileStatsTableNamePartitionFiledName + "=" + fileStatsTableNamePartitionValue + " AND recordscount !=0"
     val rs1: ResultSet = st.executeQuery(query1)
 
     while (rs1.next()) {
