@@ -61,7 +61,7 @@ class FileStatsValidator {
     //Step 2 : get a hashmap of FilePath and SuccessTableName mapping
     var filePathToTableNameMap: mutable.HashMap[String, String] = jsonToHashMap(feedsToFileNamesMappingLocation)
 
-    logger.debug("FileStatValidator : Looping on All files retrieve " + fileStatsTableName)
+    logger.debug("FileStatValidator : Looping on All files retrieved from " + fileStatsTableName)
     fileNamesAndRecordCounts.foreach(oneFileStats => {
       val fullFileName = oneFileStats._1
       val fileName = fullFileName.substring(fullFileName.lastIndexOf("/"), fullFileName.length)
@@ -78,6 +78,7 @@ class FileStatsValidator {
           }
         })
       }
+      logger.debug("FileStatValidator : successEventsTableName is: " + successEventsTableName)
 
       var successEventsCount: Double = -1
       var failedEventsCount: Double = -1
@@ -118,8 +119,10 @@ class FileStatsValidator {
 
   def calculateFailurePercentage(successEventsCount: Double, failedEventsCount: Double): String = {
     var failurePercentage: Double = -1
-    if (successEventsCount != 0) {
-      failurePercentage = 100 * (failedEventsCount / successEventsCount)
+    if (successEventsCount + failedEventsCount > 0) {
+      failurePercentage = 100 * (failedEventsCount / (successEventsCount + failedEventsCount))
+    } else {
+      logger.error("FileStatValidator: successEventsCount + failedEventsCount =" + successEventsCount + failedEventsCount)
     }
 
     return "%1.2f" format failurePercentage
