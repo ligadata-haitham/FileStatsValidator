@@ -41,7 +41,7 @@ class FileStatsValidator {
 
 
   //  def validateFileStats(fileStatsTableName: String, successEventsTableName: String, failedEventsTableName: String, partitionFieldName: String, partitionDate: String, conn: Connection): ArrayBuffer[(String, String)] = {
-  def validateFileStats(fileStatsTableName: String, fileStatsTableNamePartitionFiledName: String, fileStatsTableNamePartitionValue: String, successEventsTablePartitionFiledName: String, successEventsTablePartitionValue: String, failedEventsTableName: String, failedEventsTablePartitionFiledName: String, failedEventsTablePartitionValue: String, feedsToFileNamesMappingLocation: String, conn: Connection): ArrayBuffer[(String, String)] = {
+  def validateFileStats(fileStatsTableName: String, fileStatsTablePartitionFiledName: String, fileStatsTablePartitionDate: String, fileStatsTablePartitionStartHour: String, fileStatsTablePartitionEndHour: String, successEventsTablePartitionFiledName: String, successEventsTablePartitionValue: String, failedEventsTableName: String, failedEventsTablePartitionFiledName: String, failedEventsTablePartitionValue: String, feedsToFileNamesMappingLocation: String, conn: Connection): ArrayBuffer[(String, String)] = {
 
     var finalResult: ArrayBuffer[(String, String)] = new ArrayBuffer[(String, String)]
     var fileNamesAndRecordCounts: ArrayBuffer[(String, Double)] = new ArrayBuffer[(String, Double)]
@@ -50,7 +50,8 @@ class FileStatsValidator {
 
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
     var st: Statement = conn.createStatement()
-    val query1: String = " Select distinct(filename), recordscount from " + fileStatsTableName + " where " + fileStatsTableNamePartitionFiledName + "=" + fileStatsTableNamePartitionValue + " AND recordscount !=0"
+    var whereStatement: String = " where " + fileStatsTablePartitionFiledName + "=" + fileStatsTablePartitionDate + " AND recordscount !=0" + " AND (hour>=" + fileStatsTablePartitionStartHour + " AND hour<=" + fileStatsTablePartitionEndHour
+    val query1: String = " Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement
     val rs1: ResultSet = st.executeQuery(query1)
 
     while (rs1.next()) {
@@ -159,18 +160,22 @@ class FileStatsValidator {
     //example:  file:///path/to/hive-site.xml
     val propertiesFilePath = args(1)
 
-    var fileStatsTableName: String = ""
-    var fileStatsTableNamePartitionFiledName: String = ""
-    var fileStatsTableNamePartitionValue: String = ""
-    //    var successEventsTableName: String = ""
-    var failedEventsTableName: String = ""
     //    var partitionDate: String = ""
     //    var partitionFieldName: String = ""
-    var hiveInstanceLocationAndPort: String = ""
+    //    var hiveInstanceLocationAndPort: String = ""
+    var fileStatsTableName: String = ""
+    var fileStatsTablePartitionFiledName: String = ""
+    var fileStatsTablePartitionDate: String = ""
+    var fileStatsTablePartitionStartHour: String = ""
+    var fileStatsTablePartitionEndHour: String = ""
+
     var successEventsTablePartitionValue: String = ""
     var successEventsTablePartitionFiledName: String = ""
-    var failedEventsTablePartitionValue: String = ""
+
+    var failedEventsTableName: String = ""
     var failedEventsTablePartitionFiledName: String = ""
+    var failedEventsTablePartitionValue: String = ""
+
     var feedsToFileNamesMappingLocation: String = ""
 
 
@@ -186,22 +191,23 @@ class FileStatsValidator {
       // load a properties file
       prop.load(input)
       // get the property value and print it out
-      //      partitionDate = prop.getProperty("partition.date")
-      //      fileStatsTableName = prop.getProperty("file.stats.table.name")
-      //      successEventsTableName = prop.getProperty("success.events.table.name")
-
-      failedEventsTableName = prop.getProperty("failed.events.table.name")
-      //      partitionFieldName = prop.getProperty("partition.field.name")
       successEventsTablePartitionValue = prop.getProperty("success.events.table.partition.value")
       successEventsTablePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
+
+      failedEventsTableName = prop.getProperty("failed.events.table.name")
       failedEventsTablePartitionValue = prop.getProperty("success.events.table.partition.value")
       failedEventsTablePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
-      fileStatsTableNamePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
-      feedsToFileNamesMappingLocation = prop.getProperty("feeds.to.filenames.mapping.location")
+
+      fileStatsTablePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
+      fileStatsTablePartitionDate = prop.getProperty("success.events.table.partition.date")
+      fileStatsTablePartitionStartHour = prop.getProperty("file.stats.table.name.partition.start.hour")
+      fileStatsTablePartitionEndHour = prop.getProperty("file.stats.table.name.partition.end.hour")
+
+      feedsToFileNamesMappingLocation = prop.getProperty("file.stats.table.name.partition.hour")
 
 
       connection = getConnection(hiveConf)
-      val result1 = validateFileStats(fileStatsTableName, fileStatsTableNamePartitionFiledName, fileStatsTableNamePartitionValue, successEventsTablePartitionFiledName, successEventsTablePartitionValue, failedEventsTableName, failedEventsTablePartitionFiledName, failedEventsTablePartitionValue, feedsToFileNamesMappingLocation, connection)
+      val result1 = validateFileStats(fileStatsTableName, fileStatsTablePartitionFiledName, fileStatsTablePartitionDate, fileStatsTablePartitionStartHour, fileStatsTablePartitionEndHour, successEventsTablePartitionFiledName, successEventsTablePartitionValue, failedEventsTableName, failedEventsTablePartitionFiledName, failedEventsTablePartitionValue, feedsToFileNamesMappingLocation, connection)
 
       result1.foreach(singleFileResult => {
         println("Records Count Validation Result: " + singleFileResult._1)
