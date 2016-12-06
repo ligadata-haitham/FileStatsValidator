@@ -10,5 +10,8 @@
   "kprod.VerasDigix": "/home/bigdata/emm/jam/veras_digicelx/kprod/incoming",
   "kprod.VerasDigiy": "/home/bigdata/emm/jam/veras_digicely/kprod/incoming",
   "kprod.RedkneeTransaction": "/user/kamanjaprod/redknee/redknee_transaction/incoming",
-  "kprod.RedkneeCalldetail": "/user/kamanjaprod/redknee/redknee_calldetail/incoming"
+  "kprod.RedkneeCalldetail": "/user/kamanjaprod/redknee/redknee_calldetail/incoming",
+  "kprod.SandvineReconciliation": "/home/bigdata/vas/messaging/sandvine/bmu/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/brb/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/cuw/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/cym/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/es/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/guy/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/ht/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/jam/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/pn/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/slu/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/sur/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/tci/sandvine_reconciliation/kprod/incoming,/home/bigdata/vas/messaging/sandvine/tt/sandvine_reconciliation/kprod/incoming",
+  "kprod.Digix": "/home/bigdata/applications/group/intec_int/kprod/incoming,/home/bigdata/emm/jam/veras_digicelx/kprod/incoming",
+  "kprod.Digiy": "/home/bigdata/applications/es/intec_nat/kprod/incoming,/home/bigdata/applications/fwi/intec_nat/kprod/incoming,/home/bigdata/applications/ht/intec_nat/kprod/incoming,/home/bigdata/applications/jam/intec_nat/kprod/incoming,/home/bigdata/applications/pn/intec_nat/kprod/incoming"
 }

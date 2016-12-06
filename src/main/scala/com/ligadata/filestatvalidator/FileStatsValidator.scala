@@ -1,3 +1,5 @@
+package com.ligadata.filestatvalidator
+
 import java.io._
 import java.nio.file.{Files, Paths}
 import java.sql.{Connection, DriverManager, ResultSet, SQLException, Statement}
