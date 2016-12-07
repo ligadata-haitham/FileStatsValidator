@@ -55,7 +55,7 @@ object FileStatsValidator {
     var st: Statement = conn.createStatement()
     var whereStatement: String = " where " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND recordscount!=0"
     //+ " AND hour>=" + fileStatsTablePartitionStartHour + " AND hour<=" + fileStatsTablePartitionEndHour
-    val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement + " limit 20"
+    val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement //+ " limit 20"
     try {
       val rs1: ResultSet = st.executeQuery(query1)
       while (rs1.next()) {
@@ -63,7 +63,7 @@ object FileStatsValidator {
       }
     } catch {
       case e: Exception => {
-        logger.error("FileStatValidator : error running statement" + query1, e)
+        logger.error("FileStatValidator : error running statement: " + query1, e)
       }
     }
 
@@ -106,7 +106,7 @@ object FileStatsValidator {
         }
       } catch {
         case e: Exception => {
-          logger.error("FileStatValidator : error running statement" + query2, e)
+          logger.error("FileStatValidator : error running statement: " + query2, e)
         }
       }
       logger.debug("FileStatValidator : Getting the number of records for file " + fileName + " from table " + failedEventsTableName)
@@ -120,7 +120,7 @@ object FileStatsValidator {
         }
       } catch {
         case e: Exception => {
-          logger.error("FileStatValidator : error running statement" + query3, e)
+          logger.error("FileStatValidator : error running statement: " + query3, e)
         }
       }
       logger.debug("FileStatValidator : Validating records count")
