@@ -55,7 +55,7 @@ object FileStatsValidator {
     var st: Statement = conn.createStatement()
     var whereStatement: String = " where ( " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND recordscount>0 )"
     //+ " AND hour>=" + fileStatsTablePartitionStartHour + " AND hour<=" + fileStatsTablePartitionEndHour
-    val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement + ";"
+    val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement
     try {
       val rs1: ResultSet = st.executeQuery(query1)
       while (rs1.next()) {
@@ -97,7 +97,7 @@ object FileStatsValidator {
 
       logger.debug("FileStatValidator : Getting the number of records for file " + fileName + " from table " + successEventsTableName)
       // Step 4 : get the number of records from the SuccessEventsTable
-      val query2 = "Select count(*) from " + successEventsTableName + " where " + successEventsTablePartitionFiledName + "=" + successEventsTablePartitionValue + " and filename=" + fileName + ":"
+      val query2 = "Select count(*) from " + successEventsTableName + " where " + successEventsTablePartitionFiledName + "=" + successEventsTablePartitionValue + " and filename=" + fileName
 
       try {
         val rs2: ResultSet = st.executeQuery(query2)
@@ -111,7 +111,7 @@ object FileStatsValidator {
       }
       logger.debug("FileStatValidator : Getting the number of records for file " + fileName + " from table " + failedEventsTableName)
       // Step5 : get the number of records from the FailedEventsTable
-      val query3 = "Select count(*) from " + failedEventsTableName + " where " + failedEventsTablePartitionFiledName + "=" + failedEventsTablePartitionValue + " and filename=" + fileName + ":"
+      val query3 = "Select count(*) from " + failedEventsTableName + " where " + failedEventsTablePartitionFiledName + "=" + failedEventsTablePartitionValue + " and filename=" + fileName
 
       try {
         val rs3: ResultSet = st.executeQuery(query3)
