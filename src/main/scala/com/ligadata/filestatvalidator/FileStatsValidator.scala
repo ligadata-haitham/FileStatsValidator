@@ -201,10 +201,11 @@ object FileStatsValidator {
       failedEventsTablePartitionValue = prop.getProperty("success.events.table.partition.value")
       failedEventsTablePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
 
-      fileStatsTablePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
-      fileStatsTablePartitionDate = prop.getProperty("success.events.table.partition.date")
-      fileStatsTablePartitionStartHour = prop.getProperty("file.stats.table.name.partition.start.hour")
-      fileStatsTablePartitionEndHour = prop.getProperty("file.stats.table.name.partition.end.hour")
+      fileStatsTableName = prop.getProperty("file.stats.table.name")
+      fileStatsTablePartitionFiledName = prop.getProperty("file.stats.table.partition.filed.name")
+      fileStatsTablePartitionDate = prop.getProperty("file.stats.table.partition.date")
+      fileStatsTablePartitionStartHour = prop.getProperty("file.stats.table.partition.start.hour")
+      fileStatsTablePartitionEndHour = prop.getProperty("file.stats.table.partition.end.hour")
 
       feedsToFileNamesMappingLocation = prop.getProperty("feeds.to.filenames.mapping.location")
 
