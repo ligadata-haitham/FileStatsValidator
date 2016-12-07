@@ -206,7 +206,7 @@ object FileStatsValidator {
       fileStatsTablePartitionStartHour = prop.getProperty("file.stats.table.name.partition.start.hour")
       fileStatsTablePartitionEndHour = prop.getProperty("file.stats.table.name.partition.end.hour")
 
-      feedsToFileNamesMappingLocation = prop.getProperty("file.stats.table.name.partition.hour")
+      feedsToFileNamesMappingLocation = prop.getProperty("feeds.to.filenames.mapping.location")
 
       //////////////////////////////////////////////////////////
 
