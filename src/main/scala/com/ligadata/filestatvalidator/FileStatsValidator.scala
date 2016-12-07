@@ -2,7 +2,7 @@ package com.ligadata.filestatvalidator
 
 import java.io._
 import java.nio.file.{Files, Paths}
-import java.sql.{Connection, DriverManager, ResultSet, SQLException, Statement}
+import java.sql.{Connection, DriverManager, ResultSet, Statement}
 import java.util
 import java.util.Properties
 
@@ -33,11 +33,12 @@ object FileStatsValidator {
         hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME),
         hiveConf.getVar(ConfVars.METASTOREPWD));
     } catch {
-      case sqlEx: SQLException => {
-        logger.error(sqlEx)
+      case ex: Exception => {
+        logger.error(ex)
       }
     }
     logger.warn("FileStatValidator : Connection successful")
+    println("FileStatValidator : Connection successful")
     return conn
   }
 
@@ -53,7 +54,7 @@ object FileStatsValidator {
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
     var st: Statement = conn.createStatement()
     var whereStatement: String = " where " + fileStatsTablePartitionFiledName + "=" + fileStatsTablePartitionDate + " AND recordscount !=0" + " AND (hour>=" + fileStatsTablePartitionStartHour + " AND hour<=" + fileStatsTablePartitionEndHour
-    val query1: String = " Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement
+    val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement
     val rs1: ResultSet = st.executeQuery(query1)
 
     while (rs1.next()) {
@@ -206,6 +207,22 @@ object FileStatsValidator {
       fileStatsTablePartitionEndHour = prop.getProperty("file.stats.table.name.partition.end.hour")
 
       feedsToFileNamesMappingLocation = prop.getProperty("file.stats.table.name.partition.hour")
+
+      //////////////////////////////////////////////////////////
+
+      println("fileStatsTableName: " + fileStatsTableName)
+      println("fileStatsTablePartitionFiledName: " + fileStatsTablePartitionFiledName)
+      println("fileStatsTablePartitionDate: " + fileStatsTablePartitionDate)
+      println("fileStatsTablePartitionStartHour: " + fileStatsTablePartitionStartHour)
+      println("fileStatsTablePartitionEndHour: " + fileStatsTablePartitionEndHour)
+      println("successEventsTablePartitionValue: " + successEventsTablePartitionValue)
+      println("successEventsTablePartitionFiledName: " + successEventsTablePartitionFiledName)
+      println("failedEventsTableName: " + failedEventsTableName)
+      println("failedEventsTablePartitionFiledName: " + failedEventsTablePartitionFiledName)
+      println("failedEventsTablePartitionValue: " + failedEventsTablePartitionValue)
+      println("feedsToFileNamesMappingLocation: " + feedsToFileNamesMappingLocation)
+
+      /////////////////////////////////////////////////////////////
 
 
       connection = getConnection(hiveConf)
