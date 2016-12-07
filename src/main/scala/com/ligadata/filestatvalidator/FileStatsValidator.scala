@@ -53,12 +53,18 @@ object FileStatsValidator {
 
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
     var st: Statement = conn.createStatement()
-    var whereStatement: String = " where " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND recordscount!=0" //+ " AND hour>=" + fileStatsTablePartitionStartHour + " AND hour<=" + fileStatsTablePartitionEndHour
+    var whereStatement: String = " where " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND recordscount!=0"
+    //+ " AND hour>=" + fileStatsTablePartitionStartHour + " AND hour<=" + fileStatsTablePartitionEndHour
     val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement + " limit 20"
-    val rs1: ResultSet = st.executeQuery(query1)
-
-    while (rs1.next()) {
-      fileNamesAndRecordCounts += ((rs1.getString(1), rs1.getDouble(2)))
+    try {
+      val rs1: ResultSet = st.executeQuery(query1)
+      while (rs1.next()) {
+        fileNamesAndRecordCounts += ((rs1.getString(1), rs1.getDouble(2)))
+      }
+    } catch {
+      case e: Exception => {
+        logger.error("FileStatValidator : error running statement" + query1, e)
+      }
     }
 
 
@@ -92,17 +98,30 @@ object FileStatsValidator {
       logger.debug("FileStatValidator : Getting the number of records for file " + fileName + " from table " + successEventsTableName)
       // Step 4 : get the number of records from the SuccessEventsTable
       val query2 = "Select count(*) from " + successEventsTableName + " where " + successEventsTablePartitionFiledName + "=" + successEventsTablePartitionValue + " and filename=" + fileName
-      val rs2: ResultSet = st.executeQuery(query2)
-      while (rs2.next()) {
-        successEventsCount = rs2.getDouble(1)
-      }
 
+      try {
+        val rs2: ResultSet = st.executeQuery(query2)
+        while (rs2.next()) {
+          successEventsCount = rs2.getDouble(1)
+        }
+      } catch {
+        case e: Exception => {
+          logger.error("FileStatValidator : error running statement" + query2, e)
+        }
+      }
       logger.debug("FileStatValidator : Getting the number of records for file " + fileName + " from table " + failedEventsTableName)
       // Step5 : get the number of records from the FailedEventsTable
       val query3 = "Select count(*) from " + failedEventsTableName + " where " + failedEventsTablePartitionFiledName + "=" + failedEventsTablePartitionValue + " and filename=" + fileName
-      val rs3: ResultSet = st.executeQuery(query3)
-      while (rs3.next()) {
-        failedEventsCount = rs3.getDouble(1)
+
+      try {
+        val rs3: ResultSet = st.executeQuery(query3)
+        while (rs3.next()) {
+          failedEventsCount = rs3.getDouble(1)
+        }
+      } catch {
+        case e: Exception => {
+          logger.error("FileStatValidator : error running statement" + query3, e)
+        }
       }
       logger.debug("FileStatValidator : Validating records count")
       if (recordsCount == (successEventsCount + failedEventsCount)) {
