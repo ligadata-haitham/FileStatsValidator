@@ -21,21 +21,20 @@ object FileStatsValidator {
   def getConnection2(hiveHost: String, hivePort: String, sslTrustStorePath: String, trustStorePassword: String): Connection = {
     logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
     val driverName: String = "org.apache.hive.jdbc.HiveDriver"
+    var con: Connection = null
     //jdbc:hive2://<host>:<port>/<db>;ssl=true;sslTrustStore=<trust_store_path>;trustStorePassword=<trust_store_password>
+    //    var con: Connection = DriverManager.getConnection("jdbc:hive2://<host>:<port>/default;ssl=true;sslTrustStore=<trust_store_path>;trustStorePassword=<trust_store_password>", "hive", "")
     try {
       Class.forName(driverName)
+      var con: Connection = DriverManager.getConnection("jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword, "hive", "")
+      println(">>>>>>>>>>>>>>>>>>>>>  " + "jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword)
+      logger.warn("FileStatValidator : Connection successful")
     } catch {
-      case ex: ClassNotFoundException => {
-        // TODO Auto-generated catch block
+      case ex: Exception => {
         logger.error(ex)
         System.exit(1)
       }
     }
-    //    var con: Connection = DriverManager.getConnection("jdbc:hive2://<host>:<port>/default;ssl=true;sslTrustStore=<trust_store_path>;trustStorePassword=<trust_store_password>", "hive", "")
-    var con: Connection = DriverManager.getConnection("jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword, "hive", "")
-
-    println(">>>>>>>>>>>>>>>>>>>>>  " + "jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword)
-    logger.warn("FileStatValidator : Connection successful")
     return con
   }
 
