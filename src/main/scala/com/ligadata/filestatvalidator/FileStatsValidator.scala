@@ -94,7 +94,8 @@ object FileStatsValidator {
       val query2: String = "select file_name, count(*) from " + successEventTableName + whereStatement2 + " group by file_name"
 
       try {
-        val rs2: ResultSet = st.executeQuery(query2)
+        val st2: Statement = conn.createStatement()
+        val rs2: ResultSet = st2.executeQuery(query2)
         while (rs2.next()) {
           successEventsFilesAndCounts.put(rs2.getString(1), rs2.getDouble(2))
         }
@@ -114,7 +115,8 @@ object FileStatsValidator {
     val query3: String = "Select filename, count(*) from " + failedEventsTableName + whereStatement3 + " group by filename"
 
     try {
-      val rs3: ResultSet = st.executeQuery(query3)
+      val st3: Statement = conn.createStatement()
+      val rs3: ResultSet = st3.executeQuery(query3)
       while (rs3.next()) {
         failedEventsFilesAndCounts.put(rs3.getString(1), rs3.getDouble(2))
       }
