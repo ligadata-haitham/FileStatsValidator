@@ -1,7 +1,7 @@
 package com.ligadata.filestatvalidator
 
 import java.io._
-import java.sql.{Connection, DriverManager, ResultSet, SQLSyntaxErrorException, Statement}
+import java.sql.{Connection, DriverManager, ResultSet, Statement}
 import java.util.Properties
 
 import org.apache.hadoop.fs.Path
@@ -65,7 +65,7 @@ object FileStatsValidator {
     logger.debug("FileStatValidator : Getting all unique file names and recordscount for given date partition in table " + fileStatsTableName)
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
     var st: Statement = conn.createStatement()
-    var whereStatement: String = " where ( " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND recordscount>0" + " AND hour>=" + fileStatsTablePartitionStartHour + " AND hour<=" + fileStatsTablePartitionEndHour + ")"
+    var whereStatement: String = " where ( " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND recordscount>0 AND hour >=" + fileStatsTablePartitionStartHour + " AND hour <=" + fileStatsTablePartitionEndHour + ")"
     val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement
     var st1: Statement = conn.prepareStatement(query1, Statement.RETURN_GENERATED_KEYS)
     try {
@@ -78,7 +78,7 @@ object FileStatsValidator {
         fileNamesAndRecordCounts += ((fileName, rs1.getDouble(2)))
       }
     } catch {
-      case e: SQLSyntaxErrorException => {
+      case e: Exception => {
         logger.error("FileStatValidator : error running statement: " + query1, e)
       }
     }
@@ -100,7 +100,7 @@ object FileStatsValidator {
           successEventsFilesAndCounts.put(rs2.getString(1), rs2.getDouble(2))
         }
       } catch {
-        case e: SQLSyntaxErrorException => {
+        case e: Exception => {
           logger.error("FileStatValidator : error running statement: " + query2, e)
         }
       }
@@ -120,7 +120,7 @@ object FileStatsValidator {
         failedEventsFilesAndCounts.put(rs3.getString(1), rs3.getDouble(2))
       }
     } catch {
-      case e: SQLSyntaxErrorException => {
+      case e: Exception => {
         logger.error("FileStatValidator : error running statement: " + query3, e)
       }
     }
