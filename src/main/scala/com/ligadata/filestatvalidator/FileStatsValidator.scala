@@ -64,7 +64,7 @@ object FileStatsValidator {
 
     logger.debug("FileStatValidator : Getting all unique file names and recordscount for given date partition in table " + fileStatsTableName)
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
-    //    var st: Statement = conn.prepareStatement()
+    var st: Statement = conn.createStatement()
     var whereStatement: String = " where ( " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND recordscount>0" + " AND hour>=" + fileStatsTablePartitionStartHour + " AND hour<=" + fileStatsTablePartitionEndHour + ")"
     val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement
     var st1: Statement = conn.prepareStatement(query1, Statement.RETURN_GENERATED_KEYS)
