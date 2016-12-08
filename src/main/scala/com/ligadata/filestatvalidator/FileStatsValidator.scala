@@ -18,6 +18,27 @@ object FileStatsValidator {
   lazy val logger = LogManager.getLogger(loggerName)
 
 
+  def getConnection2(hiveHost: String, hivePort: String, sslTrustStorePath: String, trustStorePassword: String): Connection = {
+    logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
+    val driverName: String = "org.apache.hive.jdbc.HiveDriver"
+    //jdbc:hive2://<host>:<port>/<db>;ssl=true;sslTrustStore=<trust_store_path>;trustStorePassword=<trust_store_password>
+    try {
+      Class.forName(driverName)
+    } catch {
+      case ex: ClassNotFoundException => {
+        // TODO Auto-generated catch block
+        logger.error(ex)
+        System.exit(1)
+      }
+    }
+    //    var con: Connection = DriverManager.getConnection("jdbc:hive2://<host>:<port>/default;ssl=true;sslTrustStore=<trust_store_path>;trustStorePassword=<trust_store_password>", "hive", "")
+    var con: Connection = DriverManager.getConnection("jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword, "hive", "")
+
+    println(">>>>>>>>>>>>>>>>>>>>>  " + "jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword)
+    logger.warn("FileStatValidator : Connection successful")
+    return con
+  }
+
   def getConnection(hiveConf: HiveConf): Connection = {
     logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
     var conn: Connection = null
@@ -31,10 +52,10 @@ object FileStatsValidator {
     } catch {
       case ex: Exception => {
         logger.error(ex)
+        System.exit(1)
       }
     }
     logger.warn("FileStatValidator : Connection successful")
-    println("FileStatValidator : Connection successful")
     return conn
   }
 
@@ -272,6 +293,12 @@ object FileStatsValidator {
     //example:  file:///path/to/hive-site.xml
     val propertiesFilePath = args(1)
 
+    var hiveHost: String = ""
+    var hivePort: String = ""
+    var sslTrustStorePath: String = ""
+    var trustStorePassword: String = ""
+
+
     var fileStatsTableName: String = ""
     var fileStatsTablePartitionFiledName: String = ""
     var fileStatsTablePartitionDate: String = ""
@@ -302,6 +329,13 @@ object FileStatsValidator {
       // load a properties file
       prop.load(input)
       // get the property value and print it out
+      //      hiveHost: String, hivePort: String, sslTrustStorePath: String, trustStorePassword: String
+
+      hiveHost = prop.getProperty("hive.host")
+      hivePort = prop.getProperty("hive.port")
+      sslTrustStorePath = prop.getProperty("ssl.trust.store.path")
+      trustStorePassword = prop.getProperty("trust.store.password")
+
       successEventsTablesNames = prop.getProperty("success.events.tables.names")
       successEventsTablePartitionValue = prop.getProperty("success.events.table.partition.value")
       successEventsTablePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
@@ -336,7 +370,8 @@ object FileStatsValidator {
       /////////////////////////////////////////////////////////////
 
 
-      connection = getConnection(hiveConf)
+      //      connection = getConnection(hiveConf)
+      connection = getConnection2(hiveHost, hivePort, sslTrustStorePath, trustStorePassword)
       val result1 = validateFileStats(fileStatsTableName, fileStatsTablePartitionFiledName, fileStatsTablePartitionDate, fileStatsTablePartitionStartHour, fileStatsTablePartitionEndHour, successEventsTablesNames, successEventsTablePartitionFiledName, successEventsTablePartitionValue, failedEventsTableName, failedEventsTablePartitionFiledName, failedEventsTablePartitionValue, feedsToFileNamesMappingLocation, connection)
 
 
