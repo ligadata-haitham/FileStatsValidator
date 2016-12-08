@@ -46,20 +46,20 @@ object FileStatsValidator {
     var fileNamesAndRecordCounts: ArrayBuffer[(String, Double)] = new ArrayBuffer[(String, Double)]
 
 
-    logger.debug("FileStatValidator : Listing all databases....")
-    var st5: Statement = conn.prepareStatement("show databases")
-    val query0: String = "show databases"
-    try {
-      st5.execute(query0)
-      val rs: ResultSet = st5.getGeneratedKeys()
-      while (rs.next()) {
-        println(rs.getString(1))
-      }
-    } catch {
-      case e: SQLSyntaxErrorException => {
-        logger.error("FileStatValidator : error running statement: " + query0, e)
-      }
-    }
+    //    logger.debug("FileStatValidator : Listing all databases....")
+    //    var st5: Statement = conn.prepareStatement("show databases")
+    //    val query0: String = "show databases"
+    //    try {
+    //      st5.execute(query0)
+    //      val rs: ResultSet = st5.getGeneratedKeys()
+    //      while (rs.next()) {
+    //        println(rs.getString(1))
+    //      }
+    //    } catch {
+    //      case e: SQLSyntaxErrorException => {
+    //        logger.error("FileStatValidator : error running statement: " + query0, e)
+    //      }
+    //    }
 
 
     logger.debug("FileStatValidator : Getting all unique file names and recordscount for given date partition in table " + fileStatsTableName)
