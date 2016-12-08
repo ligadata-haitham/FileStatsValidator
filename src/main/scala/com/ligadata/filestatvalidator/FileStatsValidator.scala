@@ -54,7 +54,7 @@ object FileStatsValidator {
       println(">>>>>>>>>>>>>>>>>>>>> 1 " + "jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword)
       println(">>>>>>>>>>>>>>>>>>>>> 2 " + "jdbc:hive2://" + hiveHost + ":" + hivePort + "/default")
       //      var con: Connection = DriverManager.getConnection("jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword, "hive", "")
-      var con: Connection = DriverManager.getConnection("jdbc:hive2://" + hiveHost + ":" + hivePort + "/default", "hive", "")
+      con = DriverManager.getConnection("jdbc:hive2://" + hiveHost + ":" + hivePort + "/default", "hive", "")
 
       logger.warn("FileStatValidator : Connection successful")
     } catch {
@@ -68,11 +68,11 @@ object FileStatsValidator {
 
   def getConnection(hiveConf: HiveConf): Connection = {
     logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
-    var conn: Connection = null
+    var con: Connection = null
 
     try {
       Class.forName(hiveConf.getVar(ConfVars.METASTORE_CONNECTION_DRIVER));
-      conn = DriverManager.getConnection(
+      con = DriverManager.getConnection(
         hiveConf.getVar(ConfVars.METASTORECONNECTURLKEY),
         hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME),
         hiveConf.getVar(ConfVars.METASTOREPWD));
@@ -83,7 +83,7 @@ object FileStatsValidator {
       }
     }
     logger.warn("FileStatValidator : Connection successful")
-    return conn
+    return con
   }
 
 
