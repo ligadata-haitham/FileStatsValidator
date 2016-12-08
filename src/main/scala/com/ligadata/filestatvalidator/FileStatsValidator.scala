@@ -26,8 +26,11 @@ object FileStatsValidator {
     //    var con: Connection = DriverManager.getConnection("jdbc:hive2://<host>:<port>/default;ssl=true;sslTrustStore=<trust_store_path>;trustStorePassword=<trust_store_password>", "hive", "")
     try {
       Class.forName(driverName)
-       var con: Connection = DriverManager.getConnection("jdbc:hive2://" + hiveHost + ":" + hivePort + "/default", "hive", "")
-      println(">>>>>>>>>>>>>>>>>>>>>  " + "jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword)
+      println(">>>>>>>>>>>>>>>>>>>>> 1 " + "jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword)
+      println(">>>>>>>>>>>>>>>>>>>>> 2 " + "jdbc:hive2://" + hiveHost + ":" + hivePort + "/default")
+      //      var con: Connection = DriverManager.getConnection("jdbc:hive2://" + hiveHost + ":" + hivePort + "/default;ssl=true;sslTrustStore=" + sslTrustStorePath + ";trustStorePassword=" + trustStorePassword, "hive", "")
+      var con: Connection = DriverManager.getConnection("jdbc:hive2://" + hiveHost + ":" + hivePort + "/default", "hive", "")
+
       logger.warn("FileStatValidator : Connection successful")
     } catch {
       case ex: Exception => {
