@@ -47,10 +47,11 @@ object FileStatsValidator {
 
 
     logger.debug("FileStatValidator : Listing all databases....")
-    var st2: Statement = conn.createStatement()
-    val query0: String = "SHOW DATABASES"
+    var st5: Statement = conn.prepareStatement("show databases")
+    val query0: String = "show databases"
     try {
-      val rs: ResultSet = st2.executeQuery(query0)
+      st5.execute(query0)
+      val rs: ResultSet = st5.getGeneratedKeys()
       while (rs.next()) {
         println(rs.getString(1))
       }
@@ -63,11 +64,14 @@ object FileStatsValidator {
 
     logger.debug("FileStatValidator : Getting all unique file names and recordscount for given date partition in table " + fileStatsTableName)
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
-    var st: Statement = conn.createStatement()
-    var whereStatement: String = " where ( " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND recordscount>0 )" + " AND (hour>=" + fileStatsTablePartitionStartHour + " AND hour<=" + fileStatsTablePartitionEndHour + ")"
+    //    var st: Statement = conn.prepareStatement()
+    var whereStatement: String = " where ( " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND recordscount>0" + " AND hour>=" + fileStatsTablePartitionStartHour + " AND hour<=" + fileStatsTablePartitionEndHour + ")"
     val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement
+    var st1: Statement = conn.prepareStatement(query1, Statement.RETURN_GENERATED_KEYS)
     try {
-      val rs1: ResultSet = st.executeQuery(query1)
+      // val rs1: ResultSet = st.executeQuery(query1)
+      st1.execute(query1)
+      val rs1: ResultSet = st1.getGeneratedKeys
       while (rs1.next()) {
         var fullPath: String = rs1.getString(1)
         var fileName: String = fullPath.substring(fullPath.lastIndexOf("/"), fullPath.length)
