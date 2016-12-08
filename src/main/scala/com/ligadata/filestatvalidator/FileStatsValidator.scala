@@ -1,16 +1,13 @@
 package com.ligadata.filestatvalidator
 
 import java.io._
-import java.nio.file.{Files, Paths}
 import java.sql.{Connection, DriverManager, ResultSet, SQLSyntaxErrorException, Statement}
-import java.util
 import java.util.Properties
 
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hive.conf.HiveConf
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars
 import org.apache.logging.log4j.LogManager
-import org.json.JSONObject
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -43,9 +40,9 @@ object FileStatsValidator {
 
 
   //  def validateFileStats(fileStatsTableName: String, successEventsTableName: String, failedEventsTableName: String, partitionFieldName: String, partitionDate: String, conn: Connection): ArrayBuffer[(String, String)] = {
-  def validateFileStats(fileStatsTableName: String, fileStatsTablePartitionFiledName: String, fileStatsTablePartitionDate: String, fileStatsTablePartitionStartHour: String, fileStatsTablePartitionEndHour: String, successEventsTablesNames: String, successEventsTablePartitionFiledName: String, successEventsTablePartitionValue: String, failedEventsTableName: String, failedEventsTablePartitionFiledName: String, failedEventsTablePartitionValue: String, feedsToFileNamesMappingLocation: String, conn: Connection): ArrayBuffer[(String, String)] = {
+  def validateFileStats(fileStatsTableName: String, fileStatsTablePartitionFiledName: String, fileStatsTablePartitionDate: String, fileStatsTablePartitionStartHour: String, fileStatsTablePartitionEndHour: String, successEventsTablesNames: String, successEventsTablePartitionFiledName: String, successEventsTablePartitionValue: String, failedEventsTableName: String, failedEventsTablePartitionFiledName: String, failedEventsTablePartitionValue: String, feedsToFileNamesMappingLocation: String, conn: Connection): ArrayBuffer[(String, Boolean, String)] = {
 
-    var finalResult: ArrayBuffer[(String, String)] = new ArrayBuffer[(String, String)]
+    var finalResult: ArrayBuffer[(String, Boolean, String)] = new ArrayBuffer[(String, Boolean, String)]
     var fileNamesAndRecordCounts: ArrayBuffer[(String, Double)] = new ArrayBuffer[(String, Double)]
 
     logger.debug("FileStatValidator : Getting all unique file names and recordscount for given date partition in table " + fileStatsTableName)
@@ -57,13 +54,17 @@ object FileStatsValidator {
     try {
       val rs1: ResultSet = st.executeQuery(query1)
       while (rs1.next()) {
-        fileNamesAndRecordCounts += ((rs1.getString(1), rs1.getDouble(2)))
+        var fullPath: String = rs1.getString(1)
+        var fileName: String = fullPath.substring(fullPath.lastIndexOf("/"), fullPath.length)
+        fileNamesAndRecordCounts += ((fileName, rs1.getDouble(2)))
       }
     } catch {
       case e: SQLSyntaxErrorException => {
         logger.error("FileStatValidator : error running statement: " + query1, e)
       }
     }
+
+    logger.debug("FileStatValidator : Getting all file names and recordscount for given date partition in successEventTables : " + successEventsTablesNames)
 
     //Step 2 : get all unique file names and recordscount for given date partition in all outputTables;
     val successTablesNamesList: Array[String] = successEventsTablesNames.split(",")
@@ -86,7 +87,7 @@ object FileStatsValidator {
       }
     })
 
-
+    logger.debug("FileStatValidator : Getting all file names and recordscount for given date partition in failedEventsTable : " + failedEventsTableName)
     //Step 3 : get all unique file names and recordscount for given date partition in failedEventsTable;
     var failedEventsFilesAndCounts: mutable.HashMap[String, Double] = new mutable.HashMap[String, Double]
 
@@ -104,6 +105,23 @@ object FileStatsValidator {
         logger.error("FileStatValidator : error running statement: " + query3, e)
       }
     }
+
+    logger.debug("FileStatValidator : Caluclating stats for each file found in FileStatsTable : " + fileStatsTableName)
+    fileNamesAndRecordCounts.foreach(oneFileStats => {
+      val sucessRecordsCount: Double = successEventsFilesAndCounts.getOrElse(oneFileStats._1, -1)
+      val failedRecordsCount: Double = failedEventsFilesAndCounts.getOrElse(oneFileStats._1, -1)
+
+      var fileStatMatch: Boolean = false
+      var failurePercentage: String = "-1"
+
+      if (oneFileStats == (sucessRecordsCount + failedRecordsCount)) {
+        fileStatMatch = true
+      }
+
+      failurePercentage = calculateFailurePercentage(sucessRecordsCount, failedRecordsCount)
+
+      finalResult += ((oneFileStats._1, fileStatMatch, failurePercentage))
+    })
 
 
     //    //Step 2 : get a hashmap of FilePath and SuccessTableName mapping
@@ -174,9 +192,10 @@ object FileStatsValidator {
     //      finalResult += ((resultCountValidation, failurePercentage))
     //
     //    })
-
+    logger.debug("FileStatValidator : Returning FinalResult....")
     finalResult
   }
+
 
   def calculateFailurePercentage(successEventsCount: Double, failedEventsCount: Double): String = {
     var failurePercentage: Double = -1
@@ -190,28 +209,28 @@ object FileStatsValidator {
   }
 
 
-  def jsonToHashMap(pathToJsonFile: String): mutable.HashMap[String, String] = {
-    var hashmap: mutable.HashMap[String, String] = new mutable.HashMap[String, String]
-    var bufferedReader: BufferedReader = null
-    var jsonObj: JSONObject = null
-    var keysList: List[String] = null
-    try {
-      var encoded: Array[Byte] = Files.readAllBytes(Paths.get(pathToJsonFile))
-      var jsonString: String = new String(encoded, "UTF-8")
-      jsonObj = new JSONObject(jsonString)
-
-      var keysToCopyIterator: util.Iterator[_] = jsonObj.keys()
-
-      while (keysToCopyIterator.hasNext) {
-        var oneKey: String = String.valueOf(keysToCopyIterator.next())
-        var value: String = String.valueOf(jsonObj.get(oneKey))
-        hashmap += (oneKey -> value)
-
-      }
-    }
-
-    return hashmap
-  }
+  //  def jsonToHashMap(pathToJsonFile: String): mutable.HashMap[String, String] = {
+  //    var hashmap: mutable.HashMap[String, String] = new mutable.HashMap[String, String]
+  //    var bufferedReader: BufferedReader = null
+  //    var jsonObj: JSONObject = null
+  //    var keysList: List[String] = null
+  //    try {
+  //      var encoded: Array[Byte] = Files.readAllBytes(Paths.get(pathToJsonFile))
+  //      var jsonString: String = new String(encoded, "UTF-8")
+  //      jsonObj = new JSONObject(jsonString)
+  //
+  //      var keysToCopyIterator: util.Iterator[_] = jsonObj.keys()
+  //
+  //      while (keysToCopyIterator.hasNext) {
+  //        var oneKey: String = String.valueOf(keysToCopyIterator.next())
+  //        var value: String = String.valueOf(jsonObj.get(oneKey))
+  //        hashmap += (oneKey -> value)
+  //
+  //      }
+  //    }
+  //
+  //    return hashmap
+  //  }
 
 
   def main(args: Array[String]): Unit = {
@@ -220,9 +239,6 @@ object FileStatsValidator {
     //example:  file:///path/to/hive-site.xml
     val propertiesFilePath = args(1)
 
-    //    var partitionDate: String = ""
-    //    var partitionFieldName: String = ""
-    //    var hiveInstanceLocationAndPort: String = ""
     var fileStatsTableName: String = ""
     var fileStatsTablePartitionFiledName: String = ""
     var fileStatsTablePartitionDate: String = ""
@@ -248,6 +264,7 @@ object FileStatsValidator {
     var input: InputStream = null
 
     try {
+      logger.debug("FileStatValidator : Capturing properties from properties file : " + propertiesFilePath)
       input = new FileInputStream(propertiesFilePath)
       // load a properties file
       prop.load(input)
@@ -289,11 +306,14 @@ object FileStatsValidator {
       connection = getConnection(hiveConf)
       val result1 = validateFileStats(fileStatsTableName, fileStatsTablePartitionFiledName, fileStatsTablePartitionDate, fileStatsTablePartitionStartHour, fileStatsTablePartitionEndHour, successEventsTablesNames, successEventsTablePartitionFiledName, successEventsTablePartitionValue, failedEventsTableName, failedEventsTablePartitionFiledName, failedEventsTablePartitionValue, feedsToFileNamesMappingLocation, connection)
 
+
+      logger.debug("FileStatValidator : Printing out FinalResult....")
       result1.foreach(singleFileResult => {
-        println("Records Count Validation Result: " + singleFileResult._1)
-        println("Failure Percentage Result : " + singleFileResult._2)
+        println("FileStatsValidation Result : (" + singleFileResult._1 + ", " + singleFileResult._2 + ", " + singleFileResult._3 + ")")
       })
 
+
+      logger.debug("FileStatValidator : Done....")
 
     } catch {
       case ex: IOException => {
