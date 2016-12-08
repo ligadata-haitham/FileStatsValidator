@@ -24,11 +24,11 @@ object FileStatsValidator {
     var con: Connection = null
     try {
       var conf: org.apache.hadoop.conf.Configuration = new org.apache.hadoop.conf.Configuration()
+      println(">>>>>>>>>>>>>>>>>>>>> 3 " + "jdbc:hive2://jbd1node04.digicelgroup.local:10000/;principal=hive/_HOST@DIGICELGROUP.LOCAL")
       conf.set("hadoop.security.authentication", "Kerberos")
       UserGroupInformation.setConfiguration(conf)
       UserGroupInformation.loginUserFromKeytab("hive/_HOST@DIGICELGROUP.LOCAL", "/home/kamanjaprod/kamanjaprod.keytab")
       Class.forName("org.apache.hive.jdbc.HiveDriver")
-      println(">>>>>>>>>>>>>>>>>>>>> 3 " + "jdbc:hive2://jbd1node04.digicelgroup.local:10000/;principal=hive/_HOST@DIGICELGROUP.LOCAL")
       con = DriverManager.getConnection("jdbc:hive2://jbd1node04.digicelgroup.local:10000/;principal=hive/_HOST@DIGICELGROUP.LOCAL")
       System.out.println("got connection")
       logger.warn("FileStatValidator : Connection successful")
