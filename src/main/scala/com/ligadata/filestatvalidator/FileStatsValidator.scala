@@ -64,15 +64,13 @@ object FileStatsValidator {
 
     logger.debug("FileStatValidator : Getting all unique file names and recordscount for given date partition in table " + fileStatsTableName)
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
-    var st: Statement = conn.createStatement()
-    var whereStatement: String = " where ( A." + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND A.recordscount>0 AND A.hour >=" + fileStatsTablePartitionStartHour + " AND A.hour <=" + fileStatsTablePartitionEndHour + ")"
-    val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName +" A" + whereStatement
+
+    var whereStatement: String = " where ( " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND A.recordscount>0 AND `hour` >=" + fileStatsTablePartitionStartHour + " AND `hour` <=" + fileStatsTablePartitionEndHour + ")"
+    val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement
     println(">>>>>>>>>>>>>>>>>>>>" + query1)
     try {
-      // val rs1: ResultSet = st.executeQuery(query1)
-      var st1: Statement = conn.prepareStatement(query1, Statement.RETURN_GENERATED_KEYS)
-      st1.execute(query1)
-      val rs1: ResultSet = st1.getGeneratedKeys
+      val st1: Statement = conn.createStatement()
+      val rs1: ResultSet = st1.executeQuery(query1)
       while (rs1.next()) {
         var fullPath: String = rs1.getString(1)
         var fileName: String = fullPath.substring(fullPath.lastIndexOf("/"), fullPath.length)
