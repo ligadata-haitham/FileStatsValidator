@@ -1,7 +1,7 @@
 package com.ligadata.filestatvalidator
 
 import java.io._
-import java.sql.{Connection, DriverManager, ResultSet, Statement}
+import java.sql.{Connection, DriverManager, PreparedStatement, ResultSet}
 import java.util.Properties
 
 import org.apache.hadoop.fs.Path
@@ -67,11 +67,14 @@ object FileStatsValidator {
 
     //    var whereStatement: String = " where ( " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND A.recordscount>0 AND `hour` >=" + fileStatsTablePartitionStartHour + " AND `hour` <=" + fileStatsTablePartitionEndHour + ")"
     //    val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement
-    val query1: String = "select * from ch11_test.file_stats limit 1"
+    val query1: String = "select * from ch11_test.file_stats limit ?"
     println(">>>>>>>>>>>>>>>>>>>>" + query1)
     try {
-      val st1: Statement = conn.createStatement()
-      val rs1: ResultSet = st1.executeQuery(query1)
+      val st1: PreparedStatement = conn.prepareStatement(query1)
+      st1.setDouble(1, 1)
+      st1.execute()
+      val rs1: ResultSet = st1.getGeneratedKeys
+
       while (rs1.next()) {
         var fullPath: String = rs1.getString(1)
         var fileName: String = fullPath.substring(fullPath.lastIndexOf("/"), fullPath.length)
@@ -91,12 +94,16 @@ object FileStatsValidator {
 
     successTablesNamesList.foreach(successEventTableName => {
       //   select file_name, count(*) from kprod.SandvineReconciliation where date_loaded='2016-12-06' group by file_name
-      var whereStatement2: String = " where " + successEventsTablePartitionFiledName + "=" + successEventsTablePartitionValue
-      val query2: String = "select file_name, count(*) from " + successEventTableName + whereStatement2 + " group by file_name"
+      //      var whereStatement2: String = " where " + successEventsTablePartitionFiledName + "='" + successEventsTablePartitionValue + "'"
+      val query2: String = "select file_name, count(*) from ? where ? ='?' group by file_name"
 
       try {
-        val st2: Statement = conn.createStatement()
-        val rs2: ResultSet = st2.executeQuery(query2)
+        val st2: PreparedStatement = conn.prepareStatement(query1)
+        st2.setString(1, successEventTableName)
+        st2.setString(2, successEventsTablePartitionFiledName)
+        st2.setString(3, successEventsTablePartitionValue)
+        st2.execute()
+        val rs2: ResultSet = st2.getGeneratedKeys
         while (rs2.next()) {
           successEventsFilesAndCounts.put(rs2.getString(1), rs2.getDouble(2))
         }
@@ -112,12 +119,17 @@ object FileStatsValidator {
     var failedEventsFilesAndCounts: mutable.HashMap[String, Double] = new mutable.HashMap[String, Double]
 
     //    Select filename, count(*) from kprod.rejecteddata where rejectiondate='20161206' group by filename
-    var whereStatement3: String = " where " + failedEventsTablePartitionFiledName + "=" + failedEventsTablePartitionValue
-    val query3: String = "Select filename, count(*) from " + failedEventsTableName + whereStatement3 + " group by filename"
+    //    var whereStatement3: String = " where " + failedEventsTablePartitionFiledName + "='" + failedEventsTablePartitionValue + "'"
+    //    val query3: String = "Select filename, count(*) from " + failedEventsTableName + whereStatement3 + " group by filename"
+    val query3: String = "select filename, count(*) from ? where ? ='?' group by filename"
 
     try {
-      val st3: Statement = conn.createStatement()
-      val rs3: ResultSet = st3.executeQuery(query3)
+      val st3: PreparedStatement = conn.prepareStatement(query1)
+      st3.setString(1, failedEventsTableName)
+      st3.setString(2, failedEventsTablePartitionFiledName)
+      st3.setString(3, failedEventsTablePartitionValue)
+      st3.execute()
+      val rs3: ResultSet = st3.getGeneratedKeys
       while (rs3.next()) {
         failedEventsFilesAndCounts.put(rs3.getString(1), rs3.getDouble(2))
       }
