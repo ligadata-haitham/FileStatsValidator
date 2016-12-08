@@ -7,6 +7,7 @@ import java.util.Properties
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hive.conf.HiveConf
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars
+import org.apache.hadoop.security.UserGroupInformation
 import org.apache.logging.log4j.LogManager
 
 import scala.collection.mutable
@@ -16,6 +17,29 @@ object FileStatsValidator {
 
   lazy val loggerName = this.getClass.getName
   lazy val logger = LogManager.getLogger(loggerName)
+
+
+  def getConnection3(): Connection = {
+    logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
+    var con: Connection = null
+    try {
+      var conf: org.apache.hadoop.conf.Configuration = new org.apache.hadoop.conf.Configuration()
+      conf.set("hadoop.security.authentication", "Kerberos")
+      UserGroupInformation.setConfiguration(conf)
+      UserGroupInformation.loginUserFromKeytab("hive/_HOST@DIGICELGROUP.LOCAL", "/home/kamanjaprod/kamanjaprod.keytab")
+      Class.forName("org.apache.hive.jdbc.HiveDriver")
+      con = DriverManager.getConnection("jdbc:hive2://jbd1node04.digicelgroup.local:10000/;principal=hive/_HOST@DIGICELGROUP.LOCAL")
+      System.out.println("got connection")
+      logger.warn("FileStatValidator : Connection successful")
+    }
+    catch {
+      case ex: Exception => {
+        logger.error(ex)
+        System.exit(1)
+      }
+    }
+    return con
+  }
 
 
   def getConnection2(hiveHost: String, hivePort: String, sslTrustStorePath: String, trustStorePassword: String): Connection = {
@@ -377,7 +401,8 @@ object FileStatsValidator {
 
 
       //      connection = getConnection(hiveConf)
-      connection = getConnection2(hiveHost, hivePort, sslTrustStorePath, trustStorePassword)
+      //      connection = getConnection2(hiveHost, hivePort, sslTrustStorePath, trustStorePassword)
+      connection = getConnection3()
       val result1 = validateFileStats(fileStatsTableName, fileStatsTablePartitionFiledName, fileStatsTablePartitionDate, fileStatsTablePartitionStartHour, fileStatsTablePartitionEndHour, successEventsTablesNames, successEventsTablePartitionFiledName, successEventsTablePartitionValue, failedEventsTableName, failedEventsTablePartitionFiledName, failedEventsTablePartitionValue, feedsToFileNamesMappingLocation, connection)
 
 
