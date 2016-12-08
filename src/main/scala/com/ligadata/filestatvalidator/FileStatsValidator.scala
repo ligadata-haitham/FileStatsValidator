@@ -354,6 +354,10 @@ object FileStatsValidator {
 
       //////////////////////////////////////////////////////////
 
+      println("hiveHost: " + hiveHost)
+      println("hivePort: " + hivePort)
+      println("sslTrustStorePath: " + sslTrustStorePath)
+      println("trustStorePassword: " + trustStorePassword)
       println("fileStatsTableName: " + fileStatsTableName)
       println("fileStatsTablePartitionFiledName: " + fileStatsTablePartitionFiledName)
       println("fileStatsTablePartitionDate: " + fileStatsTablePartitionDate)
