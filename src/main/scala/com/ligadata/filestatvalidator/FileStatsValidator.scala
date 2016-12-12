@@ -145,7 +145,7 @@ object FileStatsValidator {
         val st2: Statement = conn.createStatement()
         val rs2: ResultSet = st2.executeQuery(query2)
         while (rs2.next()) {
-          logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query2 : inserting record (" + rs2.getString(1) + " , " + rs2.getDouble(2) + ")")
+          //          logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query2 : inserting record (" + rs2.getString(1) + " , " + rs2.getDouble(2) + ")")
           successEventsFilesAndCounts.put(rs2.getString(1), rs2.getDouble(2))
         }
       } catch {
@@ -168,7 +168,7 @@ object FileStatsValidator {
       while (rs3.next()) {
         var fullPath: String = rs3.getString(1)
         var fileName: String = fullPath.substring(fullPath.lastIndexOf("/") + 1, fullPath.length)
-        logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query3 : inserting record (" + fileName + " , " + rs3.getDouble(2) + ")")
+        //        logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query3 : inserting record (" + fileName + " , " + rs3.getDouble(2) + ")")
         failedEventsFilesAndCounts.put(fileName, rs3.getDouble(2))
       }
     } catch {
@@ -180,14 +180,15 @@ object FileStatsValidator {
     logger.debug("FileStatValidator : Caluclating stats for each file found in FileStatsTable : " + fileStatsTableName)
 
     fileNamesAndRecordCounts.foreach(oneFileStats => {
-      val sucessRecordsCount: Double = successEventsFilesAndCounts.getOrElse(oneFileStats._1, -1)
-      val failedRecordsCount: Double = failedEventsFilesAndCounts.getOrElse(oneFileStats._1, -1)
+      val sucessRecordsCount: Double = successEventsFilesAndCounts.getOrElse(oneFileStats._1, 0)
+      val failedRecordsCount: Double = failedEventsFilesAndCounts.getOrElse(oneFileStats._1, 0)
 
       var fileStatMatch: Boolean = false
       var failurePercentage: String = "-1"
 
       if (oneFileStats._2 == (sucessRecordsCount + failedRecordsCount)) {
         fileStatMatch = true
+        logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  fileStatMatch : " + fileStatMatch)
       }
 
       failurePercentage = calculateFailurePercentage(sucessRecordsCount, failedRecordsCount)
@@ -399,9 +400,9 @@ object FileStatsValidator {
 
 
       logger.debug("FileStatValidator : Printing out FinalResult....")
-      //      result1.foreach(singleFileResult => {
-      //        println("FileStatsValidation Result : (" + singleFileResult._1 + ", " + singleFileResult._2 + ", " + singleFileResult._3 + ")")
-      //      })
+      result1.foreach(singleFileResult => {
+        println("FileStatsValidation Result : (" + singleFileResult._1 + ", " + singleFileResult._2 + ", " + singleFileResult._3 + ")")
+      })
 
 
       logger.debug("FileStatValidator : Done....")
