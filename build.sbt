@@ -18,6 +18,7 @@ assemblyMergeStrategy in assembly := {
   case x if x contains "package-info.class" => MergeStrategy.last
   case x if x contains "plugin.xml" => MergeStrategy.last
   case x if x contains "Log4j2Plugins.dat" => MergeStrategy.last
+  case x if x contains "jackson" => MergeStrategy.last
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
