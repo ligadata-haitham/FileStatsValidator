@@ -33,7 +33,8 @@ excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
 
 
 // https://mvnrepository.com/artifact/org.apache.hive/hive-jdbc
-libraryDependencies += "org.apache.hive" % "hive-jdbc" % "2.1.0"
+//libraryDependencies += "org.apache.hive" % "hive-jdbc" % "2.1.0"
+libraryDependencies += "org.apache.hive" % "hive-jdbc" % "1.1.0"
 
 libraryDependencies += "org.apache.logging.log4j" % "log4j-1.2-api" % "2.4.1"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.4.1"
