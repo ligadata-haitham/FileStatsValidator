@@ -145,7 +145,7 @@ object FileStatsValidator {
         val st2: Statement = conn.createStatement()
         val rs2: ResultSet = st2.executeQuery(query2)
         while (rs2.next()) {
-          logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query2 : inserting record (" + rs2.getString(1) + rs2.getDouble(2) + ")")
+          logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query2 : inserting record (" + rs2.getString(1) + " , " + rs2.getDouble(2) + ")")
           successEventsFilesAndCounts.put(rs2.getString(1), rs2.getDouble(2))
         }
       } catch {
@@ -166,7 +166,7 @@ object FileStatsValidator {
       val st3: Statement = conn.createStatement()
       val rs3: ResultSet = st3.executeQuery(query3)
       while (rs3.next()) {
-        logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query3 : inserting record (" + rs3.getString(1) + rs3.getDouble(2) + ")")
+        logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query3 : inserting record (" + rs3.getString(1) + " , " + rs3.getDouble(2) + ")")
         failedEventsFilesAndCounts.put(rs3.getString(1), rs3.getDouble(2))
       }
     } catch {
@@ -357,8 +357,8 @@ object FileStatsValidator {
       successEventsTablePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
 
       failedEventsTableName = prop.getProperty("failed.events.table.name")
-      failedEventsTablePartitionValue = prop.getProperty("success.events.table.partition.value")
-      failedEventsTablePartitionFiledName = prop.getProperty("success.events.table.partition.field.name")
+      failedEventsTablePartitionValue = prop.getProperty("failed.events.table.partition.field.value")
+      failedEventsTablePartitionFiledName = prop.getProperty("failed.events.table.partition.field.name")
 
       fileStatsTableName = prop.getProperty("file.stats.table.name")
       fileStatsTablePartitionFiledName = prop.getProperty("file.stats.table.partition.filed.name")
