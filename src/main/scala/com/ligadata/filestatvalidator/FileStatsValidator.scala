@@ -26,7 +26,7 @@ object FileStatsValidator {
   def getConnection3(): Connection = {
     logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
     var con: Connection = null
-    try
+    try {
       Class.forName("org.apache.hive.jdbc.HiveDriver")
       var conf: org.apache.hadoop.conf.Configuration = new org.apache.hadoop.conf.Configuration();
       conf.set("hadoop.security.authentication", "Kerberos")
@@ -36,7 +36,7 @@ object FileStatsValidator {
       //      System.out.println("got connection")
       logger.warn("FileStatValidator : Connection successful")
 
-    catch {
+    } catch {
       case ex: Exception => {
         logger.error(ex)
         System.exit(1)
