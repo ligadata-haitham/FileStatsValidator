@@ -166,8 +166,10 @@ object FileStatsValidator {
       val st3: Statement = conn.createStatement()
       val rs3: ResultSet = st3.executeQuery(query3)
       while (rs3.next()) {
-        logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query3 : inserting record (" + rs3.getString(1) + " , " + rs3.getDouble(2) + ")")
-        failedEventsFilesAndCounts.put(rs3.getString(1), rs3.getDouble(2))
+        var fullPath: String = rs3.getString(1)
+        var fileName: String = fullPath.substring(fullPath.lastIndexOf("/") + 1, fullPath.length)
+        logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query3 : inserting record (" + fileName + " , " + rs3.getDouble(2) + ")")
+        failedEventsFilesAndCounts.put(fileName, rs3.getDouble(2))
       }
     } catch {
       case e: Exception => {
@@ -184,7 +186,7 @@ object FileStatsValidator {
       var fileStatMatch: Boolean = false
       var failurePercentage: String = "-1"
 
-      if (oneFileStats == (sucessRecordsCount + failedRecordsCount)) {
+      if (oneFileStats._2 == (sucessRecordsCount + failedRecordsCount)) {
         fileStatMatch = true
       }
 
