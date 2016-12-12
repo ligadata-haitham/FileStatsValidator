@@ -118,7 +118,7 @@ object FileStatsValidator {
 
     //    val query1: String = "select count(*) from ch11_test.file_stats"
     var whereStatement: String = " where ( " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND A.recordscount>0 AND `hour` >=" + fileStatsTablePartitionStartHour + " AND `hour` <=" + fileStatsTablePartitionEndHour + ")"
-    val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + whereStatement
+    val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + " A" + whereStatement
     println(">>>>>>>>>>>>>>>>>>>>" + query1)
     try {
       val st1: PreparedStatement = conn.prepareStatement(query1)
