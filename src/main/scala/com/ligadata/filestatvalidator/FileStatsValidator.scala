@@ -23,14 +23,14 @@ object FileStatsValidator {
     logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
     var con: Connection = null
     try {
+      Class.forName("org.apache.hive.jdbc.HiveDriver")
       var conf: org.apache.hadoop.conf.Configuration = new org.apache.hadoop.conf.Configuration()
       println(">>>>>>>>>>>>>>>>>>>>> 3 " + "jdbc:hive2://jbd1node04.digicelgroup.local:10000/;principal=hive/_HOST@DIGICELGROUP.LOCAL")
       conf.set("hadoop.security.authentication", "Kerberos")
       UserGroupInformation.setConfiguration(conf)
-      UserGroupInformation.loginUserFromKeytab("hive/_HOST@DIGICELGROUP.LOCAL", "/home/kamanjaprod/kamanjaprod.keytab")
-      Class.forName("org.apache.hive.jdbc.HiveDriver")
-      con = DriverManager.getConnection("jdbc:hive2://jbd1node04.digicelgroup.local:10000/;principal=hive/_HOST@DIGICELGROUP.LOCAL")
-      System.out.println("got connection")
+      UserGroupInformation.loginUserFromKeytab("kamanjaprod@DIGICELGROUP.LOCAL", "/home/kamanjaprod/kamanjaprod.keytab")
+      con = DriverManager.getConnection("jdbc:hive2://jbd1node04.digicelgroup.local:10000/default;principal=hive/_HOST@DIGICELGROUP.LOCAL", "", "")
+      //      System.out.println("got connection")
       logger.warn("FileStatValidator : Connection successful")
     }
     catch {
