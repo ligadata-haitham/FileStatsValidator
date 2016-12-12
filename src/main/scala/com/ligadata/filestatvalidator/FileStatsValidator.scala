@@ -1,7 +1,7 @@
 package com.ligadata.filestatvalidator
 
 import java.io._
-import java.sql.PreparedStatement
+import java.sql.{PreparedStatement, Statement}
 import java.util.Properties
 //import org.apache.hadoop.fs.Path
 //import org.apache.hadoop.security.UserGroupInformation
@@ -119,12 +119,12 @@ object FileStatsValidator {
     //    val query1: String = "select count(*) from ch11_test.file_stats"
     var whereStatement: String = " where ( A." + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND A.recordscount>0 AND A.hour >=" + fileStatsTablePartitionStartHour + " AND A.hour <=" + fileStatsTablePartitionEndHour + ")"
     val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + " A" + whereStatement
-    println(">>>>>>>>>>>>>>>>>>>>" + query1)
     try {
-      val st1: PreparedStatement = conn.prepareStatement(query1)
+      //      val st1: PreparedStatement = conn.prepareStatement(query1)
+      val st1: Statement = conn.createStatement()
       //      st1.setDouble(1, 1)
-      st1.execute()
-      val rs1: ResultSet = st1.getGeneratedKeys
+      //      st1.execute()
+      val rs1: ResultSet = st1.executeQuery(query1)
 
       while (rs1.next()) {
         var fullPath: String = rs1.getString(1)
