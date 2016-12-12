@@ -1,14 +1,18 @@
 package com.ligadata.filestatvalidator
 
 import java.io._
-import java.sql.{Connection, DriverManager, PreparedStatement, ResultSet}
+import java.sql.PreparedStatement
 import java.util.Properties
+//import org.apache.hadoop.fs.Path
+//import org.apache.hadoop.security.UserGroupInformation
+//import org.apache.hadoop.hive.conf.HiveConf
+//import org.apache.hadoop.hive.conf.HiveConf.ConfVars
+import java.io.IOException
+import java.sql.{Connection, DriverManager, ResultSet}
 
-import org.apache.hadoop.fs.Path
-import org.apache.hadoop.hive.conf.HiveConf
-import org.apache.hadoop.hive.conf.HiveConf.ConfVars
-import org.apache.hadoop.security.UserGroupInformation
 import org.apache.logging.log4j.LogManager
+//import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.security.UserGroupInformation
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -22,17 +26,16 @@ object FileStatsValidator {
   def getConnection3(): Connection = {
     logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
     var con: Connection = null
-    try {
+    try
       Class.forName("org.apache.hive.jdbc.HiveDriver")
-      var conf: org.apache.hadoop.conf.Configuration = new org.apache.hadoop.conf.Configuration()
-      println(">>>>>>>>>>>>>>>>>>>>> 3 " + "jdbc:hive2://jbd1node04.digicelgroup.local:10000/;principal=hive/_HOST@DIGICELGROUP.LOCAL")
+      var conf: org.apache.hadoop.conf.Configuration = new org.apache.hadoop.conf.Configuration();
       conf.set("hadoop.security.authentication", "Kerberos")
       UserGroupInformation.setConfiguration(conf)
       UserGroupInformation.loginUserFromKeytab("kamanjaprod@DIGICELGROUP.LOCAL", "/home/kamanjaprod/kamanjaprod.keytab")
       con = DriverManager.getConnection("jdbc:hive2://jbd1node04.digicelgroup.local:10000/default;principal=hive/_HOST@DIGICELGROUP.LOCAL", "", "")
       //      System.out.println("got connection")
       logger.warn("FileStatValidator : Connection successful")
-    }
+
     catch {
       case ex: Exception => {
         logger.error(ex)
@@ -66,25 +69,25 @@ object FileStatsValidator {
     return con
   }
 
-  def getConnection(hiveConf: HiveConf): Connection = {
-    logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
-    var con: Connection = null
-
-    try {
-      Class.forName(hiveConf.getVar(ConfVars.METASTORE_CONNECTION_DRIVER));
-      con = DriverManager.getConnection(
-        hiveConf.getVar(ConfVars.METASTORECONNECTURLKEY),
-        hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME),
-        hiveConf.getVar(ConfVars.METASTOREPWD));
-    } catch {
-      case ex: Exception => {
-        logger.error(ex)
-        System.exit(1)
-      }
-    }
-    logger.warn("FileStatValidator : Connection successful")
-    return con
-  }
+  //  def getConnection(hiveConf: HiveConf): Connection = {
+  //    logger.warn("FileStatValidator : Getting jdbc connection to Hive Instance")
+  //    var con: Connection = null
+  //
+  //    try {
+  //      Class.forName(hiveConf.getVar(ConfVars.METASTORE_CONNECTION_DRIVER));
+  //      con = DriverManager.getConnection(
+  //        hiveConf.getVar(ConfVars.METASTORECONNECTURLKEY),
+  //        hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME),
+  //        hiveConf.getVar(ConfVars.METASTOREPWD));
+  //    } catch {
+  //      case ex: Exception => {
+  //        logger.error(ex)
+  //        System.exit(1)
+  //      }
+  //    }
+  //    logger.warn("FileStatValidator : Connection successful")
+  //    return con
+  //  }
 
 
   //  def validateFileStats(fileStatsTableName: String, successEventsTableName: String, failedEventsTableName: String, partitionFieldName: String, partitionDate: String, conn: Connection): ArrayBuffer[(String, String)] = {
@@ -344,8 +347,8 @@ object FileStatsValidator {
 
 
     var connection: Connection = null
-    var hiveConf: HiveConf = new HiveConf()
-    hiveConf.addResource(new Path(hiveSiteXmlPath))
+    //    var hiveConf: HiveConf = new HiveConf()
+    //    hiveConf.addResource(new Path(hiveSiteXmlPath))
 
     var prop: Properties = new Properties()
     var input: InputStream = null
