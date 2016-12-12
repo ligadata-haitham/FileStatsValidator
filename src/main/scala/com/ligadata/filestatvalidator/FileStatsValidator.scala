@@ -275,7 +275,8 @@ object FileStatsValidator {
     if (successEventsCount + failedEventsCount > 0) {
       failurePercentage = 100 * (failedEventsCount / (successEventsCount + failedEventsCount))
     } else {
-      logger.error("FileStatValidator: successEventsCount + failedEventsCount =" + successEventsCount + failedEventsCount)
+      val count: Double = successEventsCount + failedEventsCount
+      logger.error("FileStatValidator: successEventsCount + failedEventsCount =" + count)
     }
 
     return "%1.2f" format failurePercentage
