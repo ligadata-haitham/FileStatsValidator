@@ -116,16 +116,11 @@ object FileStatsValidator {
     logger.debug("FileStatValidator : Getting all unique file names and recordscount for given date partition in table " + fileStatsTableName)
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
 
-    //    val query1: String = "select count(*) from ch11_test.file_stats"
     var whereStatement: String = " where ( A." + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND A.recordscount>0 AND A.hour >=" + fileStatsTablePartitionStartHour + " AND A.hour <=" + fileStatsTablePartitionEndHour + ")"
     val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + " A" + whereStatement
     try {
-      //      val st1: PreparedStatement = conn.prepareStatement(query1)
       val st1: Statement = conn.createStatement()
-      //      st1.setDouble(1, 1)
-      //      st1.execute()
       val rs1: ResultSet = st1.executeQuery(query1)
-
       while (rs1.next()) {
         var fullPath: String = rs1.getString(1)
         var fileName: String = fullPath.substring(fullPath.lastIndexOf("/") + 1, fullPath.length)
@@ -144,16 +139,13 @@ object FileStatsValidator {
     var successEventsFilesAndCounts: mutable.HashMap[String, Double] = new mutable.HashMap[String, Double]
 
     successTablesNamesList.foreach(successEventTableName => {
-      //         select file_name, count(*) from kprod.SandvineReconciliation where date_loaded='2016-12-06' group by file_name
       var whereStatement2: String = " where " + successEventsTablePartitionFiledName + "='" + successEventsTablePartitionValue + "'"
-      //            val query2: String = "select file_name, count(*) from ? where ? ='?' group by file_name"
       val query2: String = "select file_name, count(*) from " + successEventTableName + whereStatement2
-
       try {
-        //        val st2: PreparedStatement = conn.prepareStatement(query2)
         val st2: Statement = conn.createStatement()
         val rs2: ResultSet = st2.executeQuery(query2)
         while (rs2.next()) {
+          logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query2 : inserting record (" + rs2.getString(1) + rs2.getDouble(2) + ")")
           successEventsFilesAndCounts.put(rs2.getString(1), rs2.getDouble(2))
         }
       } catch {
@@ -170,13 +162,11 @@ object FileStatsValidator {
     //    Select filename, count(*) from kprod.rejecteddata where rejectiondate='20161206' group by filename
     var whereStatement3: String = " where " + failedEventsTablePartitionFiledName + "='" + failedEventsTablePartitionValue + "'"
     val query3: String = "Select filename, count(*) from " + failedEventsTableName + whereStatement3 + " group by filename"
-    //    val query3: String = "select filename, count(*) from ? where ? ='?' group by filename"
-
     try {
-      //      val st3: PreparedStatement = conn.prepareStatement(query3)
       val st3: Statement = conn.createStatement()
       val rs3: ResultSet = st3.executeQuery(query3)
       while (rs3.next()) {
+        logger.debug("FileStatValidator : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> query3 : inserting record (" + rs3.getString(1) + rs3.getDouble(2) + ")")
         failedEventsFilesAndCounts.put(rs3.getString(1), rs3.getDouble(2))
       }
     } catch {
@@ -406,9 +396,9 @@ object FileStatsValidator {
 
 
       logger.debug("FileStatValidator : Printing out FinalResult....")
-      result1.foreach(singleFileResult => {
-        println("FileStatsValidation Result : (" + singleFileResult._1 + ", " + singleFileResult._2 + ", " + singleFileResult._3 + ")")
-      })
+      //      result1.foreach(singleFileResult => {
+      //        println("FileStatsValidation Result : (" + singleFileResult._1 + ", " + singleFileResult._2 + ", " + singleFileResult._3 + ")")
+      //      })
 
 
       logger.debug("FileStatValidator : Done....")
