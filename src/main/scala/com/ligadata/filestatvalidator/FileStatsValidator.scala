@@ -117,7 +117,7 @@ object FileStatsValidator {
     //Step 1 : get all unique file names and recordscount for given date partition in table ch11_test.file_stats
 
     //    val query1: String = "select count(*) from ch11_test.file_stats"
-    var whereStatement: String = " where ( " + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND A.recordscount>0 AND `hour` >=" + fileStatsTablePartitionStartHour + " AND `hour` <=" + fileStatsTablePartitionEndHour + ")"
+    var whereStatement: String = " where ( A." + fileStatsTablePartitionFiledName + "='" + fileStatsTablePartitionDate + "' AND A.recordscount>0 AND A.hour >=" + fileStatsTablePartitionStartHour + " AND A.hour <=" + fileStatsTablePartitionEndHour + ")"
     val query1: String = "Select distinct(filename), recordscount from " + fileStatsTableName + " A" + whereStatement
     println(">>>>>>>>>>>>>>>>>>>>" + query1)
     try {
