@@ -34,6 +34,8 @@ excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
 
 // https://mvnrepository.com/artifact/org.apache.hive/hive-jdbc
 //libraryDependencies += "org.apache.hive" % "hive-jdbc" % "2.1.0"
+
+resolvers += "pentaho-aggdesigner-algorithm" at "http://repo.spring.io/libs-release/"
 libraryDependencies += "org.apache.hive" % "hive-jdbc" % "1.1.0"
 libraryDependencies += "org.apache.hive" % "hive-exec" % "1.1.0"
 libraryDependencies += "org.apache.hadoop" % "hadoop-common" % "2.6.0"
