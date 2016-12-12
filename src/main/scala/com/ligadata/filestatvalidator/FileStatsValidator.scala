@@ -140,7 +140,7 @@ object FileStatsValidator {
 
     successTablesNamesList.foreach(successEventTableName => {
       var whereStatement2: String = " where " + successEventsTablePartitionFiledName + "='" + successEventsTablePartitionValue + "'"
-      val query2: String = "select file_name, count(*) from " + successEventTableName + whereStatement2
+      val query2: String = "select file_name, count(*) from " + successEventTableName + whereStatement2 + " group by file_name"
       try {
         val st2: Statement = conn.createStatement()
         val rs2: ResultSet = st2.executeQuery(query2)
@@ -176,6 +176,7 @@ object FileStatsValidator {
     }
 
     logger.debug("FileStatValidator : Caluclating stats for each file found in FileStatsTable : " + fileStatsTableName)
+
     fileNamesAndRecordCounts.foreach(oneFileStats => {
       val sucessRecordsCount: Double = successEventsFilesAndCounts.getOrElse(oneFileStats._1, -1)
       val failedRecordsCount: Double = failedEventsFilesAndCounts.getOrElse(oneFileStats._1, -1)
